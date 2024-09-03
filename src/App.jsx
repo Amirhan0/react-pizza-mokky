@@ -3,7 +3,6 @@ import Header from "./components/Header";
 import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./routes/Routes";
 import { createContext, useState } from "react";
-
 export const SearchContext = createContext();
 export const CartContext = createContext();
 function App() {
