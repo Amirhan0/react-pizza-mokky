@@ -8,22 +8,24 @@ import Sceleton from "../components/Sceleton";
 import { SearchContext } from "../App";
 import { useDispatch, useSelector } from "react-redux";
 import { setCategoryId } from "../redux/slices/counterSlice";
+
 export default function Home() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const scelet = Array(8).fill(0);
-  const [sortId, setSort] = useState(0);
 
   const { searchInput } = useContext(SearchContext);
   const dispatch = useDispatch();
   const categoryId = useSelector((state) => state.category.selectedById);
+
+  const sortId = useSelector((state) => state.category.sortSelectedById);
 
   function onClickCategoryId(id) {
     dispatch(setCategoryId(id));
   }
 
   function onClickSortId(id) {
-    setSort(id);
+    sortId(id);
   }
 
   useEffect(() => {
@@ -52,10 +54,8 @@ export default function Home() {
   return (
     <>
       <div className="flex items-center justify-between mt-10">
-        <Category
-          onClickCategoryId={onClickCategoryId}
-        />
-        <Sort sortId={sortId} onClickSortId={onClickSortId} />
+        <Category onClickCategoryId={onClickCategoryId} />
+        <Sort onClickSortId={onClickSortId} />
       </div>
 
       <div className="mt-10">

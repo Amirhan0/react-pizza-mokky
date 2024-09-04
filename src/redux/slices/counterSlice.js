@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   selectedById: 0,
+  sortSelectedById: 0,
   categoryes: [
     "Все",
     "Мясные",
@@ -10,6 +11,7 @@ const initialState = {
     "Острые",
     "Закрытые",
   ],
+  sort: ["популярности", "по цене", "по алфавиту"],
 };
 
 export const counterSlice = createSlice({
@@ -19,9 +21,12 @@ export const counterSlice = createSlice({
     setCategoryId: (state, action) => {
       state.selectedById = action.payload;
     },
+    setSortId: (state, action) => {
+      state.sortSelectedById = action.payload;
+    },
   },
 });
 
-export const { setCategoryId } = counterSlice.actions;
+export const { setCategoryId, setSortId } = counterSlice.actions;
 
 export default counterSlice.reducer;
