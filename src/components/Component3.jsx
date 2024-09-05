@@ -1,18 +1,22 @@
-import { AppContext } from "../pages/Example";
-import { useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setComponent3 } from "../redux/slices/counterSlice";
 export default function Component3() {
-  const { state3, setState3 } = useContext(AppContext);
+  const dispatch = useDispatch();
+  const component3 = useSelector((state) => {
+    console.log(`рендер C`);
 
+    return state.example.component3;
+  });
   return (
     <>
       <div className="flex gap-10 items-center">
         <button
           className="bg-red-500 px-2 py-1 rounded "
-          onClick={() => setState3(state3 + 1)}
+          onClick={() => dispatch(setComponent3())}
         >
           +1
         </button>
-        <span className="bg-gray-300 px-2 py-1 rounded">{state3}</span>
+        <span className="bg-gray-300 px-2 py-1 rounded">{component3}</span>
       </div>
     </>
   );
