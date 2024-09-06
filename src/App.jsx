@@ -5,6 +5,7 @@ import AppRouter from "./routes/Routes";
 import { createContext, useState } from "react";
 export const SearchContext = createContext();
 export const CartContext = createContext();
+
 function App() {
   const [searchInput, setSearchInput] = useState("");
   const [resultSum, getResultSum] = useState(0);

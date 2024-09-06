@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import Category from "../components/Category";
 import Sort from "../components/Sort";
 import PizzaList from "../components/PizzaList";
@@ -8,34 +7,44 @@ import Sceleton from "../components/Sceleton";
 import { SearchContext } from "../App";
 import { useDispatch, useSelector } from "react-redux";
 import { setCategoryId } from "../redux/slices/counterSlice";
-
+import ReactPaginate from "react-paginate";
+import { useDebounce } from "use-debounce";
 export default function Home() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemsPerPage] = useState(8);
   const scelet = Array(8).fill(0);
+  const [sortId, setSort] = useState(0);
 
   const { searchInput } = useContext(SearchContext);
   const dispatch = useDispatch();
   const categoryId = useSelector((state) => state.category.selectedById);
-
-  const sortId = useSelector((state) => state.category.sortSelectedById);
-
+  const [debounceInput] = useDebounce(searchInput, 1000);
   function onClickCategoryId(id) {
     dispatch(setCategoryId(id));
   }
 
   function onClickSortId(id) {
-    sortId(id);
+    setSort(id);
+  }
+
+  function handlePageClick(event) {
+    setCurrentPage(event.selected);
   }
 
   useEffect(() => {
+    setIsLoading(true);
+    const searchQuery = `*${searchInput}*`;
     axios
       .get(
         `https://c12550f372786959.mokky.dev/items?category=${
           categoryId === 0 ? "*" : categoryId
-        }`
+        }&name=${searchQuery}`
       )
       .then((res) => {
+        console.log("API Response:", res.data);
         let pizzas = res.data;
 
         if (sortId === 0) {
@@ -46,16 +55,25 @@ export default function Home() {
           pizzas.sort((a, b) => a.name.localeCompare(b.name));
         }
 
-        setData(pizzas);
+        const totalItems = pizzas.length;
+        setPageCount(Math.ceil(totalItems / itemsPerPage));
+
+        const startIndex = currentPage * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        setData(pizzas.slice(startIndex, endIndex));
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
         setIsLoading(false);
       });
-  }, [categoryId, sortId]);
+  }, [categoryId, sortId, currentPage, itemsPerPage, debounceInput]);
 
   return (
     <>
       <div className="flex items-center justify-between mt-10">
         <Category onClickCategoryId={onClickCategoryId} />
-        <Sort onClickSortId={onClickSortId} />
+        <Sort sortId={sortId} onClickSortId={onClickSortId} />
       </div>
 
       <div className="mt-10">
@@ -65,12 +83,36 @@ export default function Home() {
         <div className="grid grid-cols-4 gap-5">
           {isLoading
             ? scelet.map((value, index) => <Sceleton key={index} />)
-            : data
-                .filter((pizza) =>
-                  pizza.name.toLowerCase().includes(searchInput.toLowerCase())
-                )
-                .map((pizza) => <PizzaList key={pizza.id} {...pizza} />)}
+            : data.map((pizza) => <PizzaList key={pizza.id} {...pizza} />)}
         </div>
+
+        <ReactPaginate
+          previousLabel={"← Назад"}
+          nextLabel={"Вперед →"}
+          breakLabel={"..."}
+          pageCount={pageCount}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={handlePageClick}
+          containerClassName={"flex justify-center mt-5"}
+          pageClassName={"mx-1"}
+          pageLinkClassName={
+            "px-4 py-2 border rounded cursor-pointer hover:bg-gray-200"
+          }
+          previousClassName={"mx-1"}
+          previousLinkClassName={
+            "px-4 py-2 border rounded cursor-pointer hover:bg-gray-200"
+          }
+          nextClassName={"mx-1"}
+          nextLinkClassName={
+            "px-4 py-2 border rounded cursor-pointer hover:bg-gray-200"
+          }
+          breakClassName={"mx-1"}
+          breakLinkClassName={
+            "px-4 py-2 border rounded cursor-pointer hover:bg-gray-200"
+          }
+          activeClassName={"bg-blue-500 text-white"}
+        />
       </div>
     </>
   );
